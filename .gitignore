@@ -122,3 +122,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.idea/ChatParserBot.iml
+.idea/inspectionProfiles/profiles_settings.xml
+/.idea
