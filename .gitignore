@@ -125,3 +125,7 @@ dmypy.json
 .idea/ChatParserBot.iml
 .idea/inspectionProfiles/profiles_settings.xml
 /.idea
+
+db.db
+
+*.db

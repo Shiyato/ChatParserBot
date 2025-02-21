@@ -17,6 +17,7 @@ bot = Bot(token=config.BOT_TOKEN)
 class Form(StatesGroup):
     menu = State()
     admin = State()
+    post = State()
 
 @router.message(F.text == "Старт")
 @router.message(F.text == "Начать")
@@ -62,19 +63,19 @@ async def admin1(callback_query: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     if data['admin'] == 'yes':
         await state.update_data({'load_type': 1})
-        await callback_query.message.edit_text(text.load_post, reply_markup=kb.load_post)
+        await callback_query.message.edit_text(text.load_post)
+        await state.set_state(Form.post)
     else:
         await callback_query.message.answer('Ошибка: Вы не являетесь администратором', reply_markup=kb.back_to_menu)
 
 
-@router.callback_query(F.data == "load_post")
-async def load_post(callback_query: types.CallbackQuery, state: FSMContext):
-    await bot.answer_callback_query(callback_query.id)
+@router.message(Form.post)
+async def load_post(message: Message, state: FSMContext):
     data = await state.get_data()
     users = db.getUsersBySub(data['load_type'])
-    print(users)
-    #for i in users:
-    #
+    for user in users:
+        await bot.send_message(user.tg_id, f"{message.text}, @{message.forward_from.username}", reply_markup=kb.admin)
+        await message.answer(text.post_loaded)
 #vvvvv
 
 @router.callback_query(F.data == "categories")

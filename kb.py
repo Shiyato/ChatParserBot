@@ -21,7 +21,7 @@ admin = [
     [InlineKeyboardButton(text="Разработка", callback_data="admin_menu8")],
     [InlineKeyboardButton(text="Сайт", callback_data="admin_menu9")],
     [InlineKeyboardButton(text="Таргет", callback_data="admin_menu10")],
-    [InlineKeyboardButton(text="Назад", callback_data="admin_back")]
+    [InlineKeyboardButton(text="Назад", callback_data="menu")]
 ]
 
 load_post = [
