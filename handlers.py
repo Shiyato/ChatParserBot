@@ -16,6 +16,7 @@ bot = Bot(token=config.BOT_TOKEN)
 
 class Form(StatesGroup):
     menu = State()
+    admin = State()
 
 @router.message(F.text == "Старт")
 @router.message(F.text == "Начать")
@@ -39,30 +40,41 @@ async def menu(callback_query: types.CallbackQuery):
 #Админка
 
 @router.callback_query(F.data == "admin_back")
-async def menu(callback_query: types.CallbackQuery):
+async def menu(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
-    if callback_query.message.from_user.username in config.admin_list:
+    data = await state.get_data()
+    if data['admin'] == 'yes':
         await callback_query.message.edit_text(text.admin, reply_markup=kb.admin)
     else:
         await callback_query.message.edit_text('Ошибка: Вы не являетесь администратором', reply_markup=kb.back_to_menu)
 
 @router.message(Command("admin"))
-async def help(message: Message):
+async def admin(message: Message, state: FSMContext):
     if message.from_user.username in config.admin_list:
-        await message.edit_text(text.admin, reply_markup=kb.admin)
-    else:
-        await message.edit_text('Ошибка: Вы не являетесь администратором', reply_markup=kb.back_to_menu)
-
-@router.callback_query(F.data == "admin_menu1")
-async def help(message: Message, callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
-    if message.from_user.username in config.admin_list:
-        await message.edit_text(text.load_post, reply_markup=kb.load_post)
+        await message.answer(text.admin, reply_markup=kb.admin)
+        await state.update_data({'admin':'yes', 'tg_id': message.from_user.id},)
     else:
         await message.answer('Ошибка: Вы не являетесь администратором', reply_markup=kb.back_to_menu)
 
+@router.callback_query(F.data == "admin_menu1")
+async def admin1(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id)
+    data = await state.get_data()
+    if data['admin'] == 'yes':
+        await state.update_data({'load_type': 1})
+        await callback_query.message.edit_text(text.load_post, reply_markup=kb.load_post)
+    else:
+        await callback_query.message.answer('Ошибка: Вы не являетесь администратором', reply_markup=kb.back_to_menu)
 
 
+@router.callback_query(F.data == "load_post")
+async def load_post(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id)
+    data = await state.get_data()
+    users = db.getUsersBySub(data['load_type'])
+    print(users)
+    #for i in users:
+    #
 #vvvvv
 
 @router.callback_query(F.data == "categories")
